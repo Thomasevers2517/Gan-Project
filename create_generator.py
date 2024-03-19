@@ -6,10 +6,14 @@ import torch
 import torchvision.utils as vutils
 import matplotlib.pyplot as plt
 
+
+
 def create_generator(dataloader, load=True):
         # Create the generator
     if load:
-        return Generator().to(device).load_state_dict(torch.load('netG_weights.pth'))
+        netG = Generator()
+        netG.load_state_dict(torch.load('netG_weights.pth'), strict=True)
+        return netG.to(device)
     netG = Generator().to(device)
     netG.apply(weights_init)
     print(netG)

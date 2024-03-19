@@ -20,11 +20,12 @@ Z_DIM = 100
 G_HIDDEN = 64
 X_DIM = 64
 D_HIDDEN = 64
-EPOCH_NUM = 1 # 5
+EPOCH_NUM = 10 # 5
 REAL_LABEL = 1
 FAKE_LABEL = 0
 lr = 2e-4
 seed = 1
+
 CUDA = CUDA and torch.cuda.is_available()
 print("PyTorch version: {}".format(torch.__version__))
 if CUDA:
@@ -33,3 +34,5 @@ if CUDA:
 if CUDA:
     torch.cuda.manual_seed(seed)
 device = torch.device("cuda:0" if CUDA else "cpu")
+
+M = 50 # latent space size

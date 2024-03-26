@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 from data import get_data
 from model import Generator, Discriminator, weights_init
 
-from init import seed, BATCH_SIZE, EPOCH_NUM, lr, REAL_LABEL, FAKE_LABEL, device, Z_DIM, M
+from init import seed, BATCH_SIZE, EPOCH_NUM, lr, REAL_LABEL, FAKE_LABEL, device, Z_DIM, M, X_DIM, G_HIDDEN, D_HIDDEN
 from create_generator import create_generator
 from loss import loss
 
@@ -28,14 +28,14 @@ if __name__ == '__main__':
     # Split dataloader into train and test
 
     # Use train_dataloader for training
-    generator = create_generator(train_dataloader, load=False) # create the generator instance
+    generator = create_generator(train_dataloader, load=True) # create the generator instance
     
     noise = torch.randn(1, Z_DIM, 1, 1, device=device) # create random noise
     with torch.no_grad():
         fake = generator(noise).detach().cpu()
     
     
-    W = torch.randn(M, 64*64)
+    W = torch.randn(M, X_DIM*X_DIM)
     W[W > 0] = 1
     W[W <= 0] = -1
     W = W.to(device)
@@ -63,7 +63,7 @@ if __name__ == '__main__':
                 # Convert image to correct device
                 image = image.to(device)
                 # Perform operations to get the generated image
-                z_opt, info = get_z_from_image(device, image, generator, W, Z_DIM, loss, phase_shift=False, alpha=alpha, iterations=1000, lr=0.05, min_delta=0.02, patience=10)
+                z_opt, info = get_z_from_image(device, image, generator, W, Z_DIM, loss, phase_shift=False, alpha=alpha, iterations=1000, lr=0.01, min_delta=0.005, patience=10)
                 generated_image = generator(z_opt).detach().cpu()
 
                 # Compute and store the MSE for the current image

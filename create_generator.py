@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 import os
 import matplotlib.pyplot as plt
-
+import time
 # Directory where plots will be saved
 plot_dir = 'training_plots'
 os.makedirs(plot_dir, exist_ok=True)
@@ -23,6 +23,8 @@ def plot_losses(G_losses, D_losses, epoch, save=True):
     plt.legend()
     if save:
         plt.savefig(os.path.join(plot_dir, f'loss_epoch_{epoch}.png'))
+    plt.show()
+    time.sleep(10)
     plt.close()
 
 
@@ -32,7 +34,7 @@ def create_generator(dataloader, load=True):
         # Create the generator
     if load:
         netG = Generator()
-        netG.load_state_dict(torch.load('netG_weights.pth'), strict=True)
+        netG.load_state_dict(torch.load('netG_weights_D64_G64_Z100.pth'), strict=True)
         return netG.to(device)
     print("Random Seed: ", seed)
     print("Batch Size: ", BATCH_SIZE)
@@ -69,7 +71,7 @@ def create_generator(dataloader, load=True):
     print("Starting Training Loop...")
     for epoch in range(EPOCH_NUM):
         for i, data in enumerate(dataloader, 0):
-
+            
             # (1) Update the discriminator with real data
             netD.zero_grad()
             # Format batch
@@ -133,10 +135,12 @@ def create_generator(dataloader, load=True):
             # Add this inside your training loop at the end of an epoch
             # For example, after the inner for loop over the dataloader:
             
-            plot_losses(G_losses, D_losses, epoch)
-                
+            # plot_losses(G_losses, D_losses, epoch)   
             iters += 1
 
         torch.save(netG.state_dict(), f'netG_weights_D{D_HIDDEN}_G{G_HIDDEN}_Z{Z_DIM}.pth')
+        print(epoch, G_losses, D_losses)
+        
+        plot_losses(G_losses, D_losses, EPOCH_NUM-1)
     return netG
 

@@ -6,6 +6,26 @@ import torch
 import torchvision.utils as vutils
 import matplotlib.pyplot as plt
 
+import os
+import matplotlib.pyplot as plt
+
+# Directory where plots will be saved
+plot_dir = 'training_plots'
+os.makedirs(plot_dir, exist_ok=True)
+
+def plot_losses(G_losses, D_losses, epoch, save=True):
+    plt.figure(figsize=(10,5))
+    plt.title("Generator and Discriminator Loss During Training")
+    plt.plot(G_losses,label="G")
+    plt.plot(D_losses,label="D")
+    plt.xlabel("iterations")
+    plt.ylabel("Loss")
+    plt.legend()
+    if save:
+        plt.savefig(os.path.join(plot_dir, f'loss_epoch_{epoch}.png'))
+    plt.close()
+
+
 
 
 def create_generator(dataloader, load=True):
@@ -14,6 +34,11 @@ def create_generator(dataloader, load=True):
         netG = Generator()
         netG.load_state_dict(torch.load('netG_weights.pth'), strict=True)
         return netG.to(device)
+    print("Random Seed: ", seed)
+    print("Batch Size: ", BATCH_SIZE)
+    print("Epoch Number: ", EPOCH_NUM)
+    print("Learning Rate: ", lr)
+    
     netG = Generator().to(device)
     netG.apply(weights_init)
     print(netG)
@@ -30,8 +55,8 @@ def create_generator(dataloader, load=True):
     viz_noise = torch.randn(BATCH_SIZE, Z_DIM, 1, 1, device=device)
 
     # Setup Adam optimizers for both G and D
-    optimizerD = optim.Adam(netD.parameters(), lr=lr, betas=(0.5, 0.999))
-    optimizerG = optim.Adam(netG.parameters(), lr=lr, betas=(0.5, 0.999))
+    optimizerD = optim.Adam(netD.parameters(), lr=lr)
+    optimizerG = optim.Adam(netG.parameters(), lr=lr)
     
     # Training Loop
 
@@ -105,9 +130,13 @@ def create_generator(dataloader, load=True):
                 with torch.no_grad():
                     fake = netG(viz_noise).detach().cpu()
                 img_list.append(vutils.make_grid(fake, padding=2, normalize=True))
-
+            # Add this inside your training loop at the end of an epoch
+            # For example, after the inner for loop over the dataloader:
+            
+            plot_losses(G_losses, D_losses, epoch)
+                
             iters += 1
 
-        torch.save(netG.state_dict(), 'netG_weights.pth')
+        torch.save(netG.state_dict(), f'netG_weights_D{D_HIDDEN}_G{G_HIDDEN}_Z{Z_DIM}.pth')
     return netG
 

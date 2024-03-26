@@ -22,62 +22,86 @@ from loss import loss
 cudnn.benchmark = True
 
 if __name__ == '__main__':
-    print("Random Seed: ", seed)
-    print("Batch Size: ", BATCH_SIZE)
-    print("Epoch Number: ", EPOCH_NUM)
-    print("Learning Rate: ", lr)
-    
+
     # Data preprocessing
     train_dataloader, test_dataloader = get_data()
     # Split dataloader into train and test
 
     # Use train_dataloader for training
-    generator = create_generator(train_dataloader, load=True) # create the generator instance
+    generator = create_generator(train_dataloader, load=False) # create the generator instance
     
     noise = torch.randn(1, Z_DIM, 1, 1, device=device) # create random noise
     with torch.no_grad():
         fake = generator(noise).detach().cpu()
-    print(vutils.make_grid(fake, padding=2, normalize=True))
     
     
     W = torch.randn(M, 64*64)
     W[W > 0] = 1
     W[W <= 0] = -1
     W = W.to(device)
-    # Print elements of dataloader
-    for data in test_dataloader:
-        data = data[0]
-        for j,image in enumerate(data):
-            image = image.to(device)
-            z = torch.randn(1,Z_DIM,1,1, device=device, requires_grad=True)
-            optimizer = torch.optim.Adam([z], lr=0.1)
-            for i in range(300):
-                loss_value = loss(image, z, generator, W)
-                optimizer.zero_grad()
-                loss_value.backward()
-                optimizer.step()
-                print(loss_value)
-                print(z)
-            generated_image = generator(z).detach().cpu()
+    
+    from functions import get_z_from_image
+    
+    original_images = []
+
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    alphas = [0.1, 1,2.5, 5]
+    MSE = []  # This will be a 2D list: outer list for each alpha, inner list for MSEs of all images under that alpha
+
+    # Loop over alphas first
+    for alpha in alphas:
+        alpha_MSEs = []  # To hold MSEs for the current alpha across all images
+        example_images = []  # To hold original image examples for plotting
+        generated_examples = []  # To hold generated image examples for plotting
+        
+        for data in test_dataloader:
+            images, _ = data  # Assuming your dataloader returns a tuple of images and labels
+            print("starting batch")
+            for j, image in enumerate(images):
+                # Convert image to correct device
+                image = image.to(device)
+                # Perform operations to get the generated image
+                z_opt, info = get_z_from_image(device, image, generator, W, Z_DIM, loss, phase_shift=False, alpha=alpha, iterations=1000, lr=0.05, min_delta=0.02, patience=10)
+                generated_image = generator(z_opt).detach().cpu()
+
+                # Compute and store the MSE for the current image
+                mse = torch.norm(image.cpu() - generated_image).item()
+                alpha_MSEs.append(mse)
+                print(f"Image {j+1} - MSE: {mse:.2f} - Alpha: {alpha} - Iterations: {info['last_iter']}")
+                # Collect examples for plotting
+                if len(example_images) < 4:
+                    example_images.append(image.cpu())
+                    generated_examples.append(generated_image)
+                else:
+                    break
             
-            plt.subplot(5, 2, 1+j*2)
-            plt.imshow(np.transpose(vutils.make_grid(image.cpu(), padding=2, normalize=True), (1, 2, 0)))
-            plt.axis('off')
-            
-            plt.subplot(5, 2, 2+2*j)
-            plt.imshow(np.transpose(vutils.make_grid(generated_image.cpu(), padding=2, normalize=True), (1, 2, 0)))
-            plt.axis('off')
-            
-            if j == 4:
-                break
+            # Break after the first batch
+            break
+        
+        # Store the MSEs for the current alpha
+        MSE.append(alpha_MSEs)
+        
+        # Plotting the examples for the current alpha
+        fig, axs = plt.subplots(4, 2, figsize=(10, 20))
+        for idx, (orig, gen) in enumerate(zip(example_images, generated_examples)):
+            axs[idx, 0].imshow(np.transpose(vutils.make_grid(orig, padding=2, normalize=True), (1, 2, 0)))
+            axs[idx, 0].set_title(f"Original - Alpha {alpha}")
+            axs[idx, 0].axis('off')
+
+            axs[idx, 1].imshow(np.transpose(vutils.make_grid(gen, padding=2, normalize=True), (1, 2, 0)))
+            axs[idx, 1].set_title(f"Generated - Alpha {alpha}\nMSE: {MSE[-1][idx]:.2f}")
+            axs[idx, 1].axis('off')
+        
         plt.show()
-        break
-            
-            
 
-    
+    # MSE now contains the MSE values for each image for each alpha, organized by alpha
 
-    
-    
-    
-    
+
+        
+
+        
+        
+        
+        

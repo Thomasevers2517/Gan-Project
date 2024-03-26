@@ -63,7 +63,7 @@ if __name__ == '__main__':
                 # Convert image to correct device
                 image = image.to(device)
                 # Perform operations to get the generated image
-                z_opt, info = get_z_from_image(device, image, generator, W, Z_DIM, loss, phase_shift=False, alpha=alpha, iterations=1000, lr=0.01, min_delta=0.005, patience=10)
+                z_opt, info = get_z_from_image(device, image, generator, W, Z_DIM, loss, phase_shift=False, alpha=alpha, iterations=2000, lr=0.01, min_delta=0.01, patience=10)
                 generated_image = generator(z_opt).detach().cpu()
 
                 # Compute and store the MSE for the current image

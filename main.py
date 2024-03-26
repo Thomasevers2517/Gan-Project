@@ -47,7 +47,7 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
     import numpy as np
 
-    alphas = [0.1, 1,2.5, 5]
+    alphas = [0.1,0.4, 1,2, 4]
     MSE = []  # This will be a 2D list: outer list for each alpha, inner list for MSEs of all images under that alpha
 
     # Loop over alphas first

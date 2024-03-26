@@ -33,4 +33,4 @@ if CUDA:
     torch.cuda.manual_seed(seed)
 device = torch.device("cuda:0" if CUDA else "cpu")
 
-M = 50 # latent space size
+M = 300 # latent space size

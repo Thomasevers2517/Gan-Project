@@ -28,13 +28,17 @@ if __name__ == '__main__':
     # Split dataloader into train and test
 
     # Use train_dataloader for training
-    generator = create_generator(train_dataloader, load=True) # create the generator instance
+    generator = create_generator(train_dataloader, load=False) # create the generator instance
     
-    noise = torch.randn(1, Z_DIM, 1, 1, device=device) # create random noise
-    with torch.no_grad():
-        fake = generator(noise).detach().cpu()
-    
-    
+    for i in range(10):
+        noise = torch.randn(1, Z_DIM, 1, 1, device=device) # create random noise
+        with torch.no_grad():
+            fake = generator(noise).detach().cpu()
+        vutils.save_image(fake, 'fake_images.png', normalize=True)
+        plt.imshow(np.transpose(vutils.make_grid(fake, padding=2, normalize=True), (1, 2, 0)))
+        plt.axis('off')
+        plt.show()
+        
     W = torch.randn(M, X_DIM*X_DIM)
     W[W > 0] = 1
     W[W <= 0] = -1
@@ -47,7 +51,7 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
     import numpy as np
 
-    alphas = [0.1,0.4, 1,2, 4]
+    alphas = [0.04, 0.1,0.4, 1,2, 4]
     MSE = []  # This will be a 2D list: outer list for each alpha, inner list for MSEs of all images under that alpha
 
     # Loop over alphas first
@@ -63,7 +67,7 @@ if __name__ == '__main__':
                 # Convert image to correct device
                 image = image.to(device)
                 # Perform operations to get the generated image
-                z_opt, info = get_z_from_image(device, image, generator, W, Z_DIM, loss, phase_shift=False, alpha=alpha, iterations=2000, lr=0.01, min_delta=0.01, patience=10)
+                z_opt, info = get_z_from_image(device, image, generator, W, Z_DIM, loss, phase_shift=True, alpha=alpha, iterations=2000, lr=0.01, min_delta=0.01, patience=10)
                 generated_image = generator(z_opt).detach().cpu()
 
                 # Compute and store the MSE for the current image

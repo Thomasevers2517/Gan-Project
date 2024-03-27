@@ -18,7 +18,7 @@ def get_data(ratio = 0.8):
 
     # Dataloader for training set
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE,
-                                        shuffle=True, num_workers=8)
+                                        shuffle=False, num_workers=8)
 
     # Dataloader for testing set
     test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=BATCH_SIZE,

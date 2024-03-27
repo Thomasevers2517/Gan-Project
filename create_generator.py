@@ -30,11 +30,11 @@ def plot_losses(G_losses, D_losses, epoch, save=True):
 
 
 
-def create_generator(dataloader, load=True):
+def create_generator(dataloader, load=True, file= 'netG_weights_D64_G64_Z100.pth'):
         # Create the generator
     if load:
         netG = Generator()
-        netG.load_state_dict(torch.load('netG_weights_D64_G64_Z100.pth'), strict=True)
+        netG.load_state_dict(torch.load(file), strict=True)
         return netG.to(device)
     print("Random Seed: ", seed)
     print("Batch Size: ", BATCH_SIZE)
@@ -138,9 +138,9 @@ def create_generator(dataloader, load=True):
             # plot_losses(G_losses, D_losses, epoch)   
             iters += 1
 
-        torch.save(netG.state_dict(), f'netG_weights_D{D_HIDDEN}_G{G_HIDDEN}_Z{Z_DIM}.pth')
+        torch.save(netG.state_dict(), f'netG_weights_D{D_HIDDEN}_G{G_HIDDEN}_Z{Z_DIM}_epoch{EPOCH_NUM}.pth')
         print(epoch, G_losses, D_losses)
         
-        plot_losses(G_losses, D_losses, EPOCH_NUM-1)
+        # plot_losses(G_losses, D_losses, EPOCH_NUM-1)
     return netG
 

@@ -16,11 +16,11 @@ CUDA = True
 DATA_PATH = './data'
 BATCH_SIZE = 128
 IMAGE_CHANNEL = 1
-Z_DIM = 100
+Z_DIM = 100 # latent space size
 G_HIDDEN = 64
 X_DIM =64
 D_HIDDEN = 64
-EPOCH_NUM = 10 # 5
+EPOCH_NUM = 14 # 5
 REAL_LABEL = 1
 FAKE_LABEL = 0
 lr = 2e-4
@@ -33,4 +33,4 @@ if CUDA:
     torch.cuda.manual_seed(seed)
 device = torch.device("cuda:0" if CUDA else "cpu")
 
-M = 300 # latent space size
+M = 300 #compressed

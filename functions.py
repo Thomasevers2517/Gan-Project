@@ -1,4 +1,9 @@
 import torch
+import torch.nn as nn
+from loss import loss
+import numpy as np
+import matplotlib.pyplot as plt
+import torchvision.utils as vutils
 
 def get_z_from_image(device, image, generator, W, Z_DIM, loss, phase_shift=True, alpha=None, iterations=300, lr=0.1, patience=10, min_delta=0.001):
     """
@@ -55,3 +60,69 @@ def get_z_from_image(device, image, generator, W, Z_DIM, loss, phase_shift=True,
         
     info = {"loss_hist": loss_hist, "last_iter": last_iter}
     return z, info
+
+
+
+def compress_images(M, Z_DIM, alpha, generator, test_dataloader, X_DIM, device, show_images=True, num_images=5):
+    
+    W = torch.randn(M, X_DIM*X_DIM)
+    W[W > 0] = 1
+    W[W <= 0] = -1
+    W = W.to(device)
+    
+
+    example_images = []
+    generated_examples = []
+    MSE = []  # This will be a 2D list: outer list for each alpha, inner list for MSEs of all images under that alpha
+    
+    # Loop over alphas first
+    
+    for data in test_dataloader:
+        images, _ = data  # Assuming your dataloader returns a tuple of images and labels
+        print("starting batch")
+        for j, image in enumerate(images):
+            # Convert image to correct device
+            image = image.to(device)
+            # Perform operations to get the generated image
+            z_opt, info = get_z_from_image(device, image, generator, W, Z_DIM, loss, phase_shift=True, alpha=alpha, iterations=2000, lr=0.01, min_delta=0.01, patience=10)
+            generated_image = generator(z_opt).detach().cpu()
+
+            # Compute and store the MSE for the current image
+            mse = torch.norm(image.cpu() - generated_image).item()
+            MSE.append(mse)
+            print(f"Image {j+1} - MSE: {mse:.2f} - Alpha: {alpha} - Iterations: {info['last_iter']}")
+            # Collect examples for plotting
+            if len(example_images) < num_images-1:
+                example_images.append(image.cpu())
+                generated_examples.append(generated_image)
+            else:
+                break
+        # Break after the first batch
+        break
+
+    
+    
+    # Plotting the examples for the current alpha
+    fig, axs = plt.subplots(4, 2, figsize=(10, 20))
+    for idx, (orig, gen) in enumerate(zip(example_images, generated_examples)):
+        axs[idx, 0].imshow(np.transpose(vutils.make_grid(orig, padding=2, normalize=True), (1, 2, 0)))
+        axs[idx, 0].set_title(f"Original - Alpha {alpha}")
+        axs[idx, 0].axis('off')
+
+        axs[idx, 1].imshow(np.transpose(vutils.make_grid(gen, padding=2, normalize=True), (1, 2, 0)))
+        axs[idx, 1].set_title(f"Generated - Alpha {alpha}\nMSE: {MSE[idx]:.2f}")
+        axs[idx, 1].axis('off')
+    save_path = f"Compression_Z_{Z_DIM}_M_{M}_alpha_{alpha}.png"
+    plt.savefig(save_path)
+    if show_images:
+        plt.show()
+    else:
+        plt.close()
+    
+    return MSE
+    
+
+    
+    
+    
+    

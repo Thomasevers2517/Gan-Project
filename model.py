@@ -1,4 +1,3 @@
-from init import Z_DIM, G_HIDDEN, IMAGE_CHANNEL, D_HIDDEN
 import torch.nn as nn
 def weights_init(m):
     classname = m.__class__.__name__
@@ -10,7 +9,7 @@ def weights_init(m):
         
         
 class Generator(nn.Module):
-    def __init__(self):
+    def __init__(self, Z_DIM, G_HIDDEN, IMAGE_CHANNEL):
         super(Generator, self).__init__()
         self.main = nn.Sequential(
             # input layer
@@ -39,7 +38,7 @@ class Generator(nn.Module):
     
 
 class Discriminator(nn.Module):
-    def __init__(self):
+    def __init__(self, D_HIDDEN, IMAGE_CHANNEL):
         super(Discriminator, self).__init__()
         self.main = nn.Sequential(
             # 1st layer

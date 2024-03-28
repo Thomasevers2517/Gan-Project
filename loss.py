@@ -1,11 +1,11 @@
 import torch
-from init import device
 
-def loss(Y, z, generator, W, phase_shift = True, alpha = None):
+
+def loss(Y, z, generator, W, phase_shift = True, alpha = None, device = 'cuda'):
     
     assert not(phase_shift and (alpha is None)) # if phase_shift is True, alpha should not be None
     
-    generated_image = generator(z).to(device)
+    generated_image = generator(z)
     flat_generated_image = generated_image.view(-1)
     latent_generated = torch.matmul(W, flat_generated_image)
     

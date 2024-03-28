@@ -1,10 +1,10 @@
 import torchvision.datasets as dset
 import torchvision.transforms as transforms
 import torch
-from init import DATA_PATH, BATCH_SIZE, X_DIM
-def get_data(ratio = 0.8):
+
+def get_data(path, ratio = 0.8, BATCH_SIZE = 128, X_DIM = 64):
     # Data preprocessing
-    dataset = dset.MNIST(root=DATA_PATH, download=True,
+    dataset = dset.MNIST(root=path, download=True,
                     transform=transforms.Compose([
                     transforms.Resize(X_DIM),
                     transforms.ToTensor(),
@@ -18,7 +18,7 @@ def get_data(ratio = 0.8):
 
     # Dataloader for training set
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE,
-                                        shuffle=False, num_workers=8)
+                                        shuffle=True, num_workers=8)
 
     # Dataloader for testing set
     test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=BATCH_SIZE,

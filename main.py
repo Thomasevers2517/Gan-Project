@@ -33,6 +33,7 @@ from functions import get_z_from_image, compress_images
 
 import matplotlib.pyplot as plt
 import numpy as np
+import json
 #FIXED
 CUDA = True
 DATA_PATH = './data'
@@ -71,7 +72,7 @@ if __name__ == '__main__':
 
     # Create all the generators
     for Z_DIM in Z_DIM_list:
-        generator = create_generator(train_dataloader, Z_DIM=Z_DIM, MAX_EPOCH_NUM=MAX_EPOCH_NUM, retrain= True) # create the generator instance
+        generator = create_generator(train_dataloader, Z_DIM=Z_DIM, MAX_EPOCH_NUM=MAX_EPOCH_NUM, retrain= False) # create the generator instance
 
     # for i in range(10):
     #     noise = torch.randn(1, Z_DIM, 1, 1, device=device) # create random noise
@@ -81,7 +82,7 @@ if __name__ == '__main__':
     #     plt.imshow(np.transpose(vutils.make_grid(fake, padding=2, normalize=True), (1, 2, 0)))
     #     plt.axis('off')
     #     plt.show()
-    
+    """
     compression_MSE = {}
     for Z_DIM in Z_DIM_list:
         compression_MSE[Z_DIM] = {}
@@ -93,12 +94,32 @@ if __name__ == '__main__':
                     compression_MSE[Z_DIM][epoch][M] = {}
                     for alpha in ALPHA_list:
                                 print(f"Z_DIM: {Z_DIM} - M: {M} - Alpha: {alpha} - Epoch: {epoch}")
-                                MSE = compress_images(M, Z_DIM, alpha, generator, test_dataloader, X_DIM, device, num_images=5, show_images=False)
+                                MSE, info = compress_images(M, Z_DIM, alpha, generator, test_dataloader, X_DIM, device, num_images=5, show_images=False)
                                 compression_MSE[Z_DIM][epoch][M][alpha] = MSE
                 
     print(compression_MSE)
     import json
     with open('compression_MSE.json', 'w') as f:
         json.dump(compression_MSE, f)
-
+    """
     # MSE now contains the MSE values for each image for each alpha, organized by alpha
+        
+    # Extracting iters info
+    iter_info = {}
+    iter_last= {}
+    for Z_DIM in Z_DIM_list:
+        epoch = 16
+        iter_info[Z_DIM]={}
+        iter_last[Z_DIM]={}
+        generator = create_generator(train_dataloader, Z_DIM=Z_DIM, MAX_EPOCH_NUM=epoch)
+        for M in M_list:
+            alpha=0.004
+            MSE, info = compress_images(M, Z_DIM, alpha, generator, test_dataloader, X_DIM, device, num_images=5, show_images=False)
+            iter_info[Z_DIM][M] = list(info['loss_hist'])
+            iter_last[Z_DIM][M] = info['last_iter']
+            print(f"Z_DIM: {Z_DIM} - M: {M} - Alpha: {alpha} - Epoch: {epoch} ---- Iterations: {info['last_iter']}")
+
+    with open('iter_info.json', 'w') as f:
+        json.dump(iter_info, f)
+    with open('iter_last.json', 'w') as f:
+        json.dump(iter_last, f)

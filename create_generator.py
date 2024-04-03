@@ -11,9 +11,13 @@ import time
 
 # Save the losses to a file
 import json
+import torch
+
 # Directory where plots will be saved
 plot_dir = 'training_plots'
 os.makedirs(plot_dir, exist_ok=True)
+
+
 
 def plot_losses(G_losses, D_losses, epoch, save=True):
     plt.figure(figsize=(10,5))

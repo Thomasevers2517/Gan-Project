@@ -100,8 +100,6 @@ def compress_images(M, Z_DIM, alpha, generator, test_dataloader, X_DIM, device, 
         # Break after the first batch
         break
 
-    
-    
     # Plotting the examples for the current alpha
     fig, axs = plt.subplots(4, 2, figsize=(10, 20))
     for idx, (orig, gen) in enumerate(zip(example_images, generated_examples)):
@@ -119,7 +117,7 @@ def compress_images(M, Z_DIM, alpha, generator, test_dataloader, X_DIM, device, 
     else:
         plt.close()
     
-    return MSE
+    return MSE, info
     
 
     

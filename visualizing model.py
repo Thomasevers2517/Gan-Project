@@ -25,11 +25,12 @@ IMAGE_SIZE = 784
 # print("\nDiscriminator Summary:")
 # summary(discriminator, (IMAGE_CHANNEL, IMAGE_SIZE, IMAGE_SIZE))
 
-data = json.load(open('compression_MSE.json'))
+# generating heatmaps for MSE
+data = json.load(open('compression_MSE_Case3.json'))
 z_dim = list(data.keys())
-epochs = list(data["10"].keys())
-m_dim = list(data["10"]["12"].keys())
-alphas = list(data["10"]["12"]["480"].keys())
+epochs = list(data["100"].keys())
+m_dim = list(data["100"]["12"].keys())
+alphas = list(data["100"]["12"]["480"].keys())
 MSE = np.zeros((len(alphas), len(m_dim), len(z_dim)))
 MSEvar = np.zeros((len(alphas), len(m_dim), len(z_dim)))
 for z in z_dim:
@@ -50,4 +51,16 @@ for i in range(len(alphas)):
     plt.title("MSE Heatmap for Alpha= "+ str(alphas[i]))
     plt.show()
 
-# print(data['1000']['12']['160']['0.004'])
+
+# generating plots for iterations
+
+# iter_data = json.load(open('iter_info.json'))
+# iter_last = {"10": {"10": 316, "40": 337, "160": 446, "480": 451}, 
+#              "50": {"10": 333, "40": 1429, "160": 2000, "480": 1631}, 
+#              "75": {"10": 475, "40": 1492, "160": 1057, "480": 1714}, 
+#              "100": {"10": 341, "40": 1328, "160": 1438, "480": 1201}, 
+#              "150": {"10": 381, "40": 1483, "160": 518, "480": 773}, 
+#              "200": {"10": 114, "40": 834, "160": 960, "480": 762}, 
+#              "1000": {"10": 79, "40": 316, "160": 553, "480": 583}}
+# z_dim = list(iter_last.keys())
+# m_dim = list(iter_last["10"].keys())

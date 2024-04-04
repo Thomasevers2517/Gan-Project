@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import torchvision.utils as vutils
 
-def get_z_from_image(device, image, generator, W, Z_DIM, loss, phase_shift=True, alpha=None, iterations=300, lr=0.1, patience=10, min_delta=0.001):
+def get_z_from_image(device, image, generator, W, Z_DIM, loss, alpha, abs_Y, phase_shift, iterations=300, lr=0.1, patience=10, min_delta=0.001):
     """
     Calculates the latent vector z from an input image using the generator network, with early stopping.
 
@@ -34,13 +34,15 @@ def get_z_from_image(device, image, generator, W, Z_DIM, loss, phase_shift=True,
     flat_image = image.view(-1)
     flat_image = flat_image.to(device)
     Y = torch.matmul(W, flat_image)
+    if abs_Y:
+        Y = torch.abs(Y)
     loss_hist = []
     
     best_loss = float('inf')
     patience_counter = 0
     last_iter = iterations
     for i in range(iterations):
-        loss_value = loss(Y, z, generator, W, phase_shift=phase_shift, alpha=alpha)
+        loss_value = loss(Y, z, generator, W, alpha=alpha, phase_shift=phase_shift)
         optimizer.zero_grad()
         loss_value.backward()
         loss_hist.append(loss_value.item())
@@ -63,7 +65,7 @@ def get_z_from_image(device, image, generator, W, Z_DIM, loss, phase_shift=True,
 
 
 
-def compress_images(M, Z_DIM, alpha, generator, test_dataloader, X_DIM, device, show_images=True, num_images=5):
+def compress_images(M, Z_DIM, alpha, generator, test_dataloader, X_DIM, device, abs_Y, phase_shift, case, show_images=True, num_images=5):
     
     W = torch.randn(M, X_DIM*X_DIM)
     W[W > 0] = 1
@@ -84,7 +86,7 @@ def compress_images(M, Z_DIM, alpha, generator, test_dataloader, X_DIM, device, 
             # Convert image to correct device
             image = image.to(device)
             # Perform operations to get the generated image
-            z_opt, info = get_z_from_image(device, image, generator, W, Z_DIM, loss, phase_shift=True, alpha=alpha, iterations=2000, lr=0.01, min_delta=0.01, patience=10)
+            z_opt, info = get_z_from_image(device, image, generator, W, Z_DIM, loss, alpha, abs_Y= abs_Y, phase_shift=phase_shift, iterations=2000, lr=0.01, min_delta=0.01, patience=10)
             generated_image = generator(z_opt).detach().cpu()
 
             # Compute and store the MSE for the current image
@@ -110,7 +112,7 @@ def compress_images(M, Z_DIM, alpha, generator, test_dataloader, X_DIM, device, 
         axs[idx, 1].imshow(np.transpose(vutils.make_grid(gen, padding=2, normalize=True), (1, 2, 0)))
         axs[idx, 1].set_title(f"Generated - Alpha {alpha}\nMSE: {MSE[idx]:.2f}")
         axs[idx, 1].axis('off')
-    save_path = f"Compression_Z_{Z_DIM}_M_{M}_alpha_{alpha}.png"
+    save_path = f"Case{case}_Compression_Z_{Z_DIM}_M_{M}_alpha_{alpha}.png"
     plt.savefig(save_path)
     if show_images:
         plt.show()

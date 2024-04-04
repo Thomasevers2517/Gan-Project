@@ -65,7 +65,7 @@ def get_z_from_image(device, image, generator, W, Z_DIM, loss, alpha, abs_Y, pha
 
 
 
-def compress_images(M, Z_DIM, alpha, generator, test_dataloader, X_DIM, device, abs_Y, phase_shift, case, show_images=True, num_images=5):
+def compress_images(M, Z_DIM, alpha, generator, test_dataloader, X_DIM, device,abs_Y, phase_shift,case, show_images=True, num_images=5):
     
     W = torch.randn(M, X_DIM*X_DIM)
     W[W > 0] = 1
@@ -112,7 +112,7 @@ def compress_images(M, Z_DIM, alpha, generator, test_dataloader, X_DIM, device, 
         axs[idx, 1].imshow(np.transpose(vutils.make_grid(gen, padding=2, normalize=True), (1, 2, 0)))
         axs[idx, 1].set_title(f"Generated - Alpha {alpha}\nMSE: {MSE[idx]:.2f}")
         axs[idx, 1].axis('off')
-    save_path = f"Case{case}_Compression_Z_{Z_DIM}_M_{M}_alpha_{alpha}.png"
+    save_path = f"Compression_Z_{Z_DIM}_M_{M}_alpha_{alpha}.png"
     plt.savefig(save_path)
     if show_images:
         plt.show()

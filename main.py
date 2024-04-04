@@ -124,7 +124,7 @@ if __name__ == '__main__':
         iter_last[Z_DIM]={}
         generator = create_generator(train_dataloader, Z_DIM=Z_DIM, MAX_EPOCH_NUM=epoch)
         for M in M_list:
-            alpha=0.004
+            alpha=0.04
             MSE, info = compress_images(M, Z_DIM, alpha, generator, test_dataloader, X_DIM, device, num_images=5, show_images=False)
             iter_info[Z_DIM][M] = list(info['loss_hist'])
             iter_last[Z_DIM][M] = info['last_iter']

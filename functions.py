@@ -65,7 +65,7 @@ def get_z_from_image(device, image, generator, W, Z_DIM, loss, alpha, abs_Y, pha
 
 
 
-def compress_images(M, Z_DIM, alpha, generator, test_dataloader, X_DIM, device,abs_Y, phase_shift,case, show_images=True, num_images=5):
+def compress_images(M, Z_DIM, alpha, generator, test_dataloader, X_DIM, device,abs_Y, phase_shift, case, show_images=True, num_images=5):
     
     W = torch.randn(M, X_DIM*X_DIM)
     W[W > 0] = 1

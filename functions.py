@@ -78,7 +78,7 @@ def compress_images(M, Z_DIM, alpha, generator, test_dataloader, X_DIM, device,a
     MSE = []  # This will be a 2D list: outer list for each alpha, inner list for MSEs of all images under that alpha
     
     # Loop over alphas first
-    
+    infos = []
     for data in test_dataloader:
         images, _ = data  # Assuming your dataloader returns a tuple of images and labels
         print("starting batch")
@@ -88,11 +88,11 @@ def compress_images(M, Z_DIM, alpha, generator, test_dataloader, X_DIM, device,a
             # Perform operations to get the generated image
             z_opt, info = get_z_from_image(device, image, generator, W, Z_DIM, loss, alpha, abs_Y= abs_Y, phase_shift=phase_shift, iterations=2000, lr=0.01, min_delta=0.01, patience=10)
             generated_image = generator(z_opt).detach().cpu()
-
+            infos.append(info)
             # Compute and store the MSE for the current image
             mse = torch.norm(image.cpu() - generated_image).item()
             MSE.append(mse)
-            print(f"Image {j+1} - MSE: {mse:.2f} - Alpha: {alpha} - Iterations: {info['last_iter']}")
+            print(f"Image {j+1} - MSE: {mse:.2f} - Alpha: {alpha} - Iterations: {info['last_iter']} - Loss: {info['loss_hist'][-1]}")
             # Collect examples for plotting
             if len(example_images) < num_images-1:
                 example_images.append(image.cpu())
@@ -118,8 +118,9 @@ def compress_images(M, Z_DIM, alpha, generator, test_dataloader, X_DIM, device,a
         plt.show()
     else:
         plt.close()
-    
-    return MSE, info
+        
+
+    return MSE, infos
     
 
     

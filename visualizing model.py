@@ -1,6 +1,6 @@
 #visualizing_model.py
 from model import Generator, Discriminator, weights_init  
-from torchsummary import summary
+# from torchsummary import summary
 import torch.nn as nn
 import json
 import seaborn as sns
@@ -9,11 +9,11 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import os
 
-Z_DIM = 100
-G_HIDDEN = 64
-D_HIDDEN = 64
-IMAGE_CHANNEL = 1
-IMAGE_SIZE = 784
+# Z_DIM = 100
+# G_HIDDEN = 64
+# D_HIDDEN = 64
+# IMAGE_CHANNEL = 1
+# IMAGE_SIZE = 784
 
 # Create an instance of the Generator and Discriminator
 # generator = Generator(Z_DIM, G_HIDDEN, IMAGE_CHANNEL)
@@ -63,7 +63,10 @@ IMAGE_SIZE = 784
 
 iter_data = json.load(open('iter_info.json'))
 iter_last = json.load(open('iter_last.json'))
-z_dim = list(iter_data.keys())
+z_dim = list(iter_data[0].keys())
+print(iter_data.keys())
+print(iter_data["10"].keys())
+
 print(iter_data['1000']['10'][-1])
 m_dim = list(iter_data["10"].keys())
 print(m_dim)
@@ -73,13 +76,16 @@ iter_loss={}
 for z in z_dim:
     iter_loss[z]={}
     for m in m_dim:
-        iter_loss[z][m]=iter_data[z][m][-1]
-        plt.plot(iter_data[z][m], label='M='+m)
+        for i in range(len(iter_data)):
+                
+            iter_loss[z][m]=iter_data[z][m][-1]
+            print(f"z: {z}   m: {m}   mean: {np.mean(iter_data[z][m][i][-1])}")
+            plt.plot(iter_data[z][m][i]["loss_hist"], label=f"IMG = {i}   M= {m}")
         #plt.axvline(x=iter_last[z][m], color='r', linestyle='--', label='Early Stopping')
-        plt.xlabel("Iterations")
-        plt.ylabel("Loss")
-        plt.title(f"Loss for Z={z}")
-        plt.legend()
+    plt.xlabel("Iterations")
+    plt.ylabel("Loss")
+    plt.title(f"Loss for Z={z}")
+    plt.legend()
     plt.show()
 
 # mse = pd.DataFrame.from_dict(iter_loss)

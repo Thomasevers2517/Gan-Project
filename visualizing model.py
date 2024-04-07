@@ -7,6 +7,7 @@ import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import os
 
 Z_DIM = 100
 G_HIDDEN = 64
@@ -27,15 +28,19 @@ IMAGE_SIZE = 784
 # summary(discriminator, (IMAGE_CHANNEL, IMAGE_SIZE, IMAGE_SIZE))
 
 # # generating heatmaps for MSE
-# data = json.load(open('compression_MSE_onlyepoch16.json'))
+# data = json.load(open('compression_MSE_Case3.json'))
+# save_path = f'MSE_heatmap_Case3/'                   #Change the path to save the heatmaps
+# #os.mkdir(save_path)
+
 # z_dim = list(data.keys())
-# epochs = list(data["100"].keys())
-# m_dim = list(data["100"]["16"].keys())
-# alphas = list(data["100"]["16"]["480"].keys())
+# epochs = list(data["1000"].keys())
+# print(epochs)
+# m_dim = list(data["1000"]["12"].keys())
+# alphas = list(data["1000"]["12"]["480"].keys())
 # MSE = np.zeros((len(alphas), len(m_dim), len(z_dim)))
 # MSEvar = np.zeros((len(alphas), len(m_dim), len(z_dim)))
 # for z in z_dim:
-#     epoch= '16'
+#     epoch= '12'
 #     for m in m_dim:
 #         for alpha in alphas:
 #             err=np.mean(data[z][epoch][m][alpha])
@@ -50,7 +55,8 @@ IMAGE_SIZE = 784
 #     plt.xlabel("Z Dimension")
 #     plt.ylabel("M Dimension")
 #     plt.title("MSE Heatmap for Alpha= "+ str(alphas[i]))
-#     plt.show()
+#     plt.savefig(save_path+f"MSE_heatmap_alpha_{alphas[i]}.png")
+#     plt.close()
 
 
 # generating plots for iterations
@@ -58,9 +64,11 @@ IMAGE_SIZE = 784
 iter_data = json.load(open('iter_info.json'))
 iter_last = json.load(open('iter_last.json'))
 z_dim = list(iter_data.keys())
-print(z_dim)
+print(iter_data['1000']['10'][-1])
 m_dim = list(iter_data["10"].keys())
 print(m_dim)
+# plt.plot(iter_data['1000']['480'], label='M=480')
+# plt.show()
 iter_loss={}
 for z in z_dim:
     iter_loss[z]={}
@@ -74,34 +82,34 @@ for z in z_dim:
         plt.legend()
     plt.show()
 
-mse = pd.DataFrame.from_dict(iter_loss)
-mse = pd.DataFrame(mse, index=m_dim)
-mse = mse.reset_index() 
-mse = pd.melt(mse, id_vars=['index'], value_vars=z_dim)  # Melt DataFrame
-mse.columns = ['M', 'Z', 'Loss']
+# mse = pd.DataFrame.from_dict(iter_loss)
+# mse = pd.DataFrame(mse, index=m_dim)
+# mse = mse.reset_index() 
+# mse = pd.melt(mse, id_vars=['index'], value_vars=z_dim)  # Melt DataFrame
+# mse.columns = ['M', 'Z', 'Loss']
 
-iter= pd.DataFrame.from_dict(iter_last)
-iter = pd.DataFrame(iter, index=m_dim)
-iter = iter.reset_index()
-iter = pd.melt(iter, id_vars=['index'], value_vars=z_dim)
-iter.columns = ['M', 'Z', 'Iter']
-print(mse)
-print(iter) 
-colour= {'10': 'pink', '50': 'blue', '75': 'green', '100': 'orange', '150': 'red', '200': 'skyblue', '1000': 'brown'}
-marker={'10': 'o', '40': '^', '160': 'D', '480': 'P'}
-fig, ax = plt.subplots()
-for i in range(len(mse)):
-    ax.scatter(iter["Iter"][i], mse["Loss"][i], c=colour[mse["Z"][i]], marker=marker[mse["M"][i]])
+# iter= pd.DataFrame.from_dict(iter_last)
+# iter = pd.DataFrame(iter, index=m_dim)
+# iter = iter.reset_index()
+# iter = pd.melt(iter, id_vars=['index'], value_vars=z_dim)
+# iter.columns = ['M', 'Z', 'Iter']
+# print(mse)
+# print(iter) 
+# colour= {'10': 'pink', '50': 'blue', '75': 'green', '100': 'orange', '150': 'red', '200': 'skyblue', '1000': 'brown'}
+# marker={'10': 'o', '40': '^', '160': 'D', '480': 'P'}
+# fig, ax = plt.subplots()
+# for i in range(len(mse)):
+#     ax.scatter(iter["Iter"][i], mse["Loss"][i], c=colour[mse["Z"][i]], marker=marker[mse["M"][i]])
 
-markers1 = [plt.Line2D([0,0],[0,0],color=color, marker='o', linestyle='') for color in colour.values()]
-firstlegend= ax.legend(markers1, colour.keys(), numpoints=1, title="Z Dimension", loc='upper right',bbox_to_anchor=(1.05, 1))
-ax.add_artist(firstlegend)
-markers2 = [plt.Line2D([0,0],[0,0],color='black', marker=marker, linestyle='') for marker in marker.values()]
-ax.legend(markers2, marker.keys(), numpoints=1, title="M Dimension", loc='lower right', bbox_to_anchor=(1.05, 0))
-plt.xlabel("Iterations")
-plt.ylabel("MSE")
-plt.title("Iterations vs MSE")
-plt.show()
+# markers1 = [plt.Line2D([0,0],[0,0],color=color, marker='o', linestyle='') for color in colour.values()]
+# firstlegend= ax.legend(markers1, colour.keys(), numpoints=1, title="Z Dimension", loc='upper right',bbox_to_anchor=(1.05, 1))
+# ax.add_artist(firstlegend)
+# markers2 = [plt.Line2D([0,0],[0,0],color='black', marker=marker, linestyle='') for marker in marker.values()]
+# ax.legend(markers2, marker.keys(), numpoints=1, title="M Dimension", loc='lower right', bbox_to_anchor=(1.05, 0))
+# plt.xlabel("Iterations")
+# plt.ylabel("MSE")
+# plt.title("Iterations vs MSE")
+# plt.show()
 
 
 

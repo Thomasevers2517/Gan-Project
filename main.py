@@ -71,8 +71,8 @@ if __name__ == '__main__':
     # Split dataloader into train and test
 
     # Create all the generators
-    for Z_DIM in Z_DIM_list:
-        generator = create_generator(train_dataloader, Z_DIM=Z_DIM, MAX_EPOCH_NUM=MAX_EPOCH_NUM, retrain= False) # create the generator instance
+    # for Z_DIM in Z_DIM_list:
+    #     generator = create_generator(train_dataloader, Z_DIM=Z_DIM, MAX_EPOCH_NUM=MAX_EPOCH_NUM, retrain= False) # create the generator instance
 
     # for i in range(10):
     #     noise = torch.randn(1, Z_DIM, 1, 1, device=device) # create random noise
@@ -94,27 +94,27 @@ if __name__ == '__main__':
         phase_shift_correction = True	    
 
 
-    compression_MSE = {}
-    for Z_DIM in Z_DIM_list:
-        compression_MSE[Z_DIM] = {}
-        for epoch in range(MAX_EPOCH_NUM):
-            if (epoch==1 or epoch%4==0) and (not epoch==0):
-                compression_MSE[Z_DIM][epoch] = {}
-                generator = create_generator(train_dataloader, Z_DIM=Z_DIM, MAX_EPOCH_NUM=epoch) # create the generator instance
-                for M in M_list:
-                    compression_MSE[Z_DIM][epoch][M] = {}
-                    for alpha in ALPHA_list:
-                                print(f"Z_DIM: {Z_DIM} - M: {M} - Alpha: {alpha} - Epoch: {epoch}")
-                                MSE, info = compress_images(M, Z_DIM, alpha, generator, test_dataloader, X_DIM, device, abs_Y, phase_shift_correction,case, num_images=5, show_images=False)
-                                compression_MSE[Z_DIM][epoch][M][alpha] = MSE
+    # compression_MSE = {}
+    # for Z_DIM in Z_DIM_list:
+    #     compression_MSE[Z_DIM] = {}
+    #     for epoch in range(MAX_EPOCH_NUM):
+    #         if (epoch==1 or epoch%4==0) and (not epoch==0):
+    #             compression_MSE[Z_DIM][epoch] = {}
+    #             generator = create_generator(train_dataloader, Z_DIM=Z_DIM, MAX_EPOCH_NUM=epoch) # create the generator instance
+    #             for M in M_list:
+    #                 compression_MSE[Z_DIM][epoch][M] = {}
+    #                 for alpha in ALPHA_list:
+    #                             print(f"Z_DIM: {Z_DIM} - M: {M} - Alpha: {alpha} - Epoch: {epoch}")
+    #                             MSE, info = compress_images(M, Z_DIM, alpha, generator, test_dataloader, X_DIM, device, abs_Y, phase_shift_correction,case, num_images=5, show_images=False)
+    #                             compression_MSE[Z_DIM][epoch][M][alpha] = MSE
                 
-    print(compression_MSE)
-    import json
-    with open('compression_MSE_Case'+str(case)+'.json', 'w') as f:
-        json.dump(compression_MSE, f)
+    # print(compression_MSE)
+    # import json
+    # with open('compression_MSE_Case'+str(case)+'.json', 'w') as f:
+    #     json.dump(compression_MSE, f)
     
     # MSE now contains the MSE values for each image for each alpha, organized by alpha
-    """   
+
     # Extracting iters info
     iter_info = {}
     iter_last= {}
@@ -125,13 +125,10 @@ if __name__ == '__main__':
         generator = create_generator(train_dataloader, Z_DIM=Z_DIM, MAX_EPOCH_NUM=epoch)
         for M in M_list:
             alpha=0.04
-            MSE, info = compress_images(M, Z_DIM, alpha, generator, test_dataloader, X_DIM, device, num_images=5, show_images=False)
-            iter_info[Z_DIM][M] = list(info['loss_hist'])
-            iter_last[Z_DIM][M] = info['last_iter']
-            print(f"Z_DIM: {Z_DIM} - M: {M} - Alpha: {alpha} - Epoch: {epoch} ---- Iterations: {info['last_iter']}")
+            MSE, infos = compress_images(M, Z_DIM, alpha, generator, test_dataloader, X_DIM, device, num_images=5, show_images=False, abs_Y=abs_Y, phase_shift=phase_shift_correction, case=case)
+            iter_info[Z_DIM][M] = list(info for info in infos)
+            print(f"Z_DIM: {Z_DIM} - M: {M} - Alpha: {alpha} - Epoch: {epoch} ---- Iterations: {np.mean([ image['last_iter'] for image in iter_info[Z_DIM][M]])} ---- Loss: {np.mean([ image['loss_hist'][-1] for image in iter_info[Z_DIM][M]])}")
 
     with open('iter_info.json', 'w') as f:
         json.dump(iter_info, f)
-    with open('iter_last.json', 'w') as f:
-        json.dump(iter_last, f)
-"""
+

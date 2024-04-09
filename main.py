@@ -82,38 +82,41 @@ if __name__ == '__main__':
     #     plt.imshow(np.transpose(vutils.make_grid(fake, padding=2, normalize=True), (1, 2, 0)))
     #     plt.axis('off')
     #     plt.show()
-    case=3
-    if case==1:
-        abs_Y=False
-        phase_shift_correction = False 
-    elif case==2:
-        abs_Y=True
-        phase_shift_correction = False 
-    elif case==3:
-        abs_Y=True
-        phase_shift_correction = True	    
+    for case in [1,3]:
+
+        if case==1:
+            abs_Y=False
+            phase_shift_correction = False 
+        elif case==2:
+            abs_Y=True
+            phase_shift_correction = False 
+        elif case==3:
+            abs_Y=True
+            phase_shift_correction = True	    
 
 
-    compression_MSE = {}
-    for Z_DIM in Z_DIM_list:
-        compression_MSE[Z_DIM] = {}
-        for epoch in range(MAX_EPOCH_NUM):
-            # if (epoch==1 or epoch%4==0) and (not epoch==0):
-            print(epoch)
-            if epoch==15:
-                compression_MSE[Z_DIM][epoch] = {}
-                generator = create_generator(train_dataloader, Z_DIM=Z_DIM, MAX_EPOCH_NUM=epoch) # create the generator instance
-                for M in M_list:
-                    compression_MSE[Z_DIM][epoch][M] = {}
-                    for alpha in ALPHA_list:
-                                print(f"Z_DIM: {Z_DIM} - M: {M} - Alpha: {alpha} - Epoch: {epoch}")
-                                MSE, info = compress_images(M, Z_DIM, alpha, generator, test_dataloader, X_DIM, device, abs_Y, phase_shift_correction,case, num_images=15, show_images=False, save_images =False)
-                                compression_MSE[Z_DIM][epoch][M][alpha] = MSE
-                
-    print(compression_MSE)
-    import json
-    with open('compression_MSE_z_150_epoch_16_Case'+str(case)+'.json', 'w') as f:
-        json.dump(compression_MSE, f)
+        compression_MSE = {}
+        
+        images =  [image for image, _ in test_dataloader]
+        for Z_DIM in Z_DIM_list:
+            compression_MSE[Z_DIM] = {}
+            for epoch in range(MAX_EPOCH_NUM):
+                # if (epoch==1 or epoch%4==0) and (not epoch==0):
+                print(epoch)
+                if epoch==15:
+                    compression_MSE[Z_DIM][epoch] = {}
+                    generator = create_generator(train_dataloader, Z_DIM=Z_DIM, MAX_EPOCH_NUM=epoch) # create the generator instance
+                    for M in M_list:
+                        compression_MSE[Z_DIM][epoch][M] = {}
+                        for alpha in ALPHA_list:
+                                    print(f"Z_DIM: {Z_DIM} - M: {M} - Alpha: {alpha} - Epoch: {epoch}")
+                                    MSE, info = compress_images(M, Z_DIM, alpha, generator, images, X_DIM, device, abs_Y, phase_shift_correction,case, num_images=15, show_images=False, save_images =False)
+                                    compression_MSE[Z_DIM][epoch][M][alpha] = MSE
+                    
+        print(compression_MSE)
+        import json
+        with open('compression_MSE_z_150_epoch_16_Case'+str(case)+'.json', 'w') as f:
+            json.dump(compression_MSE, f)
     
     # MSE now contains the MSE values for each image for each alpha, organized by alpha
 

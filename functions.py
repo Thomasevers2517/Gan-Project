@@ -79,8 +79,8 @@ def compress_images(M, Z_DIM, alpha, generator, test_dataloader, X_DIM, device,a
     
     # Loop over alphas first
     infos = []
-    for data in test_dataloader:
-        images, _ = data  # Assuming your dataloader returns a tuple of images and labels
+    for images in test_dataloader:
+         # Assuming your dataloader returns a tuple of images and labels
         print("starting batch")
         for j, image in enumerate(images):
             # Convert image to correct device

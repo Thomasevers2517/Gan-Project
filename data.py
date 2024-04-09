@@ -21,7 +21,7 @@ def get_data(path, ratio = 0.8, BATCH_SIZE = 128, X_DIM = 64):
                                         shuffle=True, num_workers=12)
 
     # Dataloader for testing set
-    test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=5,
-                                        shuffle=False, num_workers=6)
+    test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=15,
+                                        shuffle=False, num_workers=18)
     
     return train_dataloader, test_dataloader

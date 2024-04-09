@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import torchvision.utils as vutils
 
-def get_z_from_image(device, image, generator, W, Z_DIM, loss, alpha, abs_Y, phase_shift, iterations=300, lr=0.1, patience=10, min_delta=0.001):
+def get_z_from_image(device, image, generator, W, Z_DIM, alpha, abs_Y, phase_shift, iterations=300, lr=0.1, patience=10, min_delta=0.001):
     """
     Calculates the latent vector z from an input image using the generator network, with early stopping.
 
@@ -86,7 +86,8 @@ def compress_images(M, Z_DIM, alpha, generator, test_dataloader, X_DIM, device,a
             # Convert image to correct device
             image = image.to(device)
             # Perform operations to get the generated image
-            z_opt, info = get_z_from_image(device, image, generator, W, Z_DIM, loss, alpha, abs_Y= abs_Y, phase_shift=phase_shift, iterations=2000, lr=0.01, min_delta=0.01, patience=10)
+            z_opt, info = get_z_from_image(device, image, generator, W, Z_DIM, alpha, abs_Y= abs_Y, phase_shift=phase_shift, iterations=2000, lr=0.01, min_delta=0.01, patience=10)
+            print(f"got z: {z_opt}")
             generated_image = generator(z_opt).detach().cpu()
             infos.append(info)
             # Compute and store the MSE for the current image

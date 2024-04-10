@@ -45,6 +45,7 @@ import os
 # print(epochs)
 # m_dim = list(data["1000"]["16"].keys())
 # alphas = list(data["1000"]["16"]["480"].keys())
+# print(alphas)
 # MSE = np.zeros((len(alphas), len(m_dim), len(z_dim)))
 # MSEvar = np.zeros((len(alphas), len(m_dim), len(z_dim)))
 # for z in z_dim:
@@ -95,41 +96,77 @@ import os
 
 
 # MSE vs Iterations Scatter plot for all Z and M dimensions
-loss_data = json.load(open('compression_MSE_onlyepoch16.json'))
-iter_data = json.load(open('iter_info.json'))
-z_dim = list(loss_data.keys())
-print(z_dim)
-epochs = list(loss_data["1000"].keys())
+# loss_data = json.load(open('compression_MSE_onlyepoch16.json'))
+# iter_data = json.load(open('iter_info.json'))
+# z_dim = list(loss_data.keys())
+# print(z_dim)
+# epochs = list(loss_data["1000"].keys())
+# print(epochs)
+# m_dim = list(loss_data["1000"]["16"].keys())
+# print(m_dim)
+# alphas = list(loss_data["1000"]["16"]["480"].keys())
+# print(alphas)   
+# epoch='16'
+# alpha='0.04'
+# iter_last={}
+# MSE = pd.DataFrame(columns = ['Z', 'M', 'Last_iter', 'MSE'])
+# for z in z_dim:
+#     iter_last[z]={}
+#     for m in m_dim:
+#         iters= [iter_data[z][m][i]['last_iter'] for i in range(5)]
+#         iter_last[z][m]=np.mean(iters)
+#         df= {'Z': z, 'M': m, 'Last_iter': iter_last[z][m], 'MSE': np.mean(loss_data[z][epoch][m][alpha])} 
+#         MSE = pd.concat([MSE, pd.DataFrame([df])], ignore_index=True)
+
+
+# #colour = {'10': 'violet', '50': 'indigo', '75': 'blue', '100': 'green', '150': 'yellow', '200': 'orange', '1000': 'red'}
+# colour = {'10': 'gold', '50': 'darkorange', '75': 'orangered', '100': 'red', '150': 'firebrick', '200': 'maroon', '1000': 'black'}
+# marker={'10': 'o', '40': '^', '160': 'D', '480': 'P'}
+# fig, ax = plt.subplots(1, 1, figsize=(6,6))
+# for i in range(len(MSE)):
+#     ax.scatter(MSE['Last_iter'][i], MSE["MSE"][i], c=colour[MSE["Z"][i]], marker=marker[MSE["M"][i]], s=100)
+
+# markers1 = [plt.Line2D([0,0],[0,0],color=color, marker='o', linestyle='') for color in colour.values()]
+# firstlegend= ax.legend(markers1, colour.keys(), numpoints=1, title="k", loc='upper left',bbox_to_anchor=(1.01, 1))
+# ax.add_artist(firstlegend)
+# markers2 = [plt.Line2D([0,0],[0,0],color='black', marker=marker, linestyle='') for marker in marker.values()]
+# ax.legend(markers2, marker.keys(), numpoints=1, title="m", loc='lower left', bbox_to_anchor=(1.01, 0))
+# plt.xlabel("Iterations till convergence", fontsize=12)
+# plt.ylabel("MSE", fontsize=12)
+# plt.title("Iterations vs MSE", fontsize=12)
+# plt.show()
+
+
+#compression_MSE_epoch_16_Case1.json
+data = json.load(open('compression_MSE_z_150_epoch_16_Case3.json'))
+save_path = f'MSE_heatmap_z_150_epoch_16_Case3/'                   #Change the path to save the heatmaps
+#os.mkdir(save_path)
+epoch= '15'
+z_dim = list(data.keys())
+epochs = list(data["150"].keys())
 print(epochs)
-m_dim = list(loss_data["1000"]["16"].keys())
-print(m_dim)
-alphas = list(loss_data["1000"]["16"]["480"].keys())
-print(alphas)   
-epoch='16'
-alpha='0.04'
-iter_last={}
-MSE = pd.DataFrame(columns = ['Z', 'M', 'Last_iter', 'MSE'])
-for z in z_dim:
-    iter_last[z]={}
-    for m in m_dim:
-        iters= [iter_data[z][m][i]['last_iter'] for i in range(5)]
-        iter_last[z][m]=np.mean(iters)
-        df= {'Z': z, 'M': m, 'Last_iter': iter_last[z][m], 'MSE': np.mean(loss_data[z][epoch][m][alpha])} 
-        MSE = pd.concat([MSE, pd.DataFrame([df])], ignore_index=True)
+m_dim = list(data["150"][epoch].keys())
+alphas = list(data["150"][epoch]["480"].keys())
+print(alphas)
+MSE = np.zeros(( len(m_dim), len(alphas)))
+MSEvar = np.zeros(( len(m_dim), len(alphas)))
 
+z='150'
+for m in m_dim:
+    for alpha in alphas:
+        err=np.mean(data[z][epoch][m][alpha])
+        var=np.std(data[z][epoch][m][alpha])
+        MSE[int(m_dim.index(m)), int(alphas.index(alpha))]=err
+        MSEvar[int(m_dim.index(m)), int(alphas.index(alpha))]=var
+print(MSE.shape)
 
-colour= {'10': 'purple', '50': 'blue', '75': 'skyblue', '100': 'green', '150': 'yellow', '200': 'orange', '1000': 'red'}
-marker={'10': 'o', '40': '^', '160': 'D', '480': 'P'}
-fig, ax = plt.subplots(1, 1, figsize=(6,6))
-for i in range(len(MSE)):
-    ax.scatter(MSE['Last_iter'][i], MSE["MSE"][i], c=colour[MSE["Z"][i]], marker=marker[MSE["M"][i]])
-
-markers1 = [plt.Line2D([0,0],[0,0],color=color, marker='o', linestyle='') for color in colour.values()]
-firstlegend= ax.legend(markers1, colour.keys(), numpoints=1, title="k Dimensions", loc='upper left',bbox_to_anchor=(1.01, 1))
-ax.add_artist(firstlegend)
-markers2 = [plt.Line2D([0,0],[0,0],color='black', marker=marker, linestyle='') for marker in marker.values()]
-ax.legend(markers2, marker.keys(), numpoints=1, title="m Dimensions", loc='lower left', bbox_to_anchor=(1.01, 0))
-plt.xlabel("Iterations")
-plt.ylabel("MSE")
-plt.title("Iterations vs MSE")
+sns.heatmap(MSE, annot=True, annot_kws={'va':'bottom', 'size': 'x-large'}, fmt=".2f", cmap='YlOrRd', xticklabels=alphas, yticklabels=m_dim, cbar=False)
+sns.heatmap(MSE, annot=MSEvar, annot_kws={'va':'top', 'size': 'large'}, fmt=".2f", cmap='YlOrRd', xticklabels=alphas, yticklabels=m_dim, cbar=False)
+plt.xticks(fontsize=14)  
+plt.yticks(fontsize=14) 
+plt.xlabel("alpha values", fontsize=14)
+plt.ylabel("m values", fontsize=14)
+plt.title("MSE Heatmap Case 3 for k= "+z, fontsize=14)
 plt.show()
+#plt.savefig(save_path+f"MSE_heatmap_alpha_{alphas[i]}.png")
+

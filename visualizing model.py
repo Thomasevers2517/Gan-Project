@@ -37,7 +37,7 @@ import os
 
 # generating heatmaps for MSE
 
-# data = json.load(open('compression_MSE_onlyepoch16.json'))
+# data = json.load(open('Compression_losses/compression_MSE_onlyepoch16.json'))
 # save_path = f'MSE_heatmap_Case3_onlyepoch16/'                   #Change the path to save the heatmaps
 # #os.mkdir(save_path)
 # z_dim = list(data.keys())
@@ -96,7 +96,7 @@ import os
 
 
 # MSE vs Iterations Scatter plot for all Z and M dimensions
-# loss_data = json.load(open('compression_MSE_onlyepoch16.json'))
+# loss_data = json.load(open('Compression_losses/compression_MSE_onlyepoch16.json'))
 # iter_data = json.load(open('iter_info.json'))
 # z_dim = list(loss_data.keys())
 # print(z_dim)
@@ -138,7 +138,7 @@ import os
 
 
 #compression_MSE_epoch_16_Case1.json
-data = json.load(open('compression_MSE_z_150_epoch_16_Case3.json'))
+data = json.load(open('Compression_losses/compression_MSE_z_150_epoch_16_Case3.json'))
 save_path = f'MSE_heatmap_z_150_epoch_16_Case3/'                   #Change the path to save the heatmaps
 #os.mkdir(save_path)
 epoch= '15'

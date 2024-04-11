@@ -39,7 +39,7 @@ def plot_losses(G_losses, D_losses, epoch, save=True):
 def create_generator(dataloader, Z_DIM, MAX_EPOCH_NUM, retrain=False, seed=1, BATCH_SIZE=128, lr=2e-4, REAL_LABEL=1, FAKE_LABEL=0, device='cuda:0',  IMAGE_CHANNEL=1, G_HIDDEN=64, D_HIDDEN=64, X_DIM=64):
         # Create the generator
         
-    file= f'netG_weights_D{D_HIDDEN}_G{G_HIDDEN}_Z{Z_DIM}_epoch{MAX_EPOCH_NUM-1}.pth'
+    file= f'Gan_weights/netG_weights_D{D_HIDDEN}_G{G_HIDDEN}_Z{Z_DIM}_epoch{MAX_EPOCH_NUM-1}.pth'
 
     if os.path.exists(file) and not retrain:
         print(F"Loading existing model: {file}")
@@ -149,11 +149,11 @@ def create_generator(dataloader, Z_DIM, MAX_EPOCH_NUM, retrain=False, seed=1, BA
             D_losses.append(errD.item())
 
 
-        torch.save(netG.state_dict(), f'netG_weights_D{D_HIDDEN}_G{G_HIDDEN}_Z{Z_DIM}_epoch{epoch}.pth')
+        torch.save(netG.state_dict(), f'Gan_weights/netG_weights_D{D_HIDDEN}_G{G_HIDDEN}_Z{Z_DIM}_epoch{epoch}.pth')
 
     
     # Save the losses to a JSON file
-    with open(f'losses_D{D_HIDDEN}_G{G_HIDDEN}_Z{Z_DIM}_epoch{MAX_EPOCH_NUM}.json', 'w') as f:
+    with open(f'Gan_losses/losses_D{D_HIDDEN}_G{G_HIDDEN}_Z{Z_DIM}_epoch{MAX_EPOCH_NUM}.json', 'w') as f:
         json.dump({'G_losses': G_losses, 'D_losses': D_losses}, f)
 
     return netG

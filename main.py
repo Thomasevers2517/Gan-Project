@@ -115,7 +115,7 @@ if __name__ == '__main__':
                     
         print(compression_MSE)
         import json
-        with open('compression_MSE_z_150_epoch_16_Case'+str(case)+'.json', 'w') as f:
+        with open('Compression_losses/compression_MSE_z_150_epoch_16_Case'+str(case)+'.json', 'w') as f:
             json.dump(compression_MSE, f)
     
     # MSE now contains the MSE values for each image for each alpha, organized by alpha

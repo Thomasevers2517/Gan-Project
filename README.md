@@ -2,7 +2,8 @@
 
 This repository contains all the code required for the assignment. 
 
-The code can be ran by going into the main directory and entering the following command:
-'code'
-python run.py --Z_DIM_list 100 200 --M_list 64 128 --ALPHA_list 0.5 0.6 --EPOCH_list 5 10 --NOISE_STD_list 0.1 0.2 --case_list 1 
+The code can be ran by going into the main directory and entering the following command: 
+
+`python run.py --n_img 3 --k 100 200 --m 64 128 --alpha 0.5 0.6 --epoch 5 10 --noise_std 0.1 0.2 --case 1 `
+
 

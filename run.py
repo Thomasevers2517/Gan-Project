@@ -53,7 +53,7 @@ parser.add_argument('--m', nargs='+', type=int, default=[250], help='The number 
 parser.add_argument('--alpha', nargs='+', type=float, default=[0.4], help='The alpha values')
 parser.add_argument('--epoch', nargs='+', type=int, default=[16], help='The epoch numbers')
 parser.add_argument('--noise_std', nargs='+', type=float, default=[0.001], help='The standard deviations of the noise')
-parser.add_argument('--case_list', nargs='+', type=int, default=[3], help='The case numbers')
+parser.add_argument('--case', nargs='+', type=int, default=[3], help='The case numbers')
 
 # Parse the arguments
 args = parser.parse_args()

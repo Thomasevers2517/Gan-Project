@@ -66,7 +66,7 @@ def get_z_from_image(device, image, generator, W, Z_DIM, alpha, abs_Y, phase_shi
 
 
 
-def compress_images(M, Z_DIM, alpha, generator, test_dataloader, X_DIM, device,abs_Y, phase_shift, case, show_images=True, num_images=5, save_images=False):
+def compress_images(M, Z_DIM, alpha, generator, images, X_DIM, device,abs_Y, phase_shift, case, show_images=True, num_images=5, save_images=False):
     
     W = torch.randn(M, X_DIM*X_DIM)
     W[W > 0] = 1
@@ -80,33 +80,28 @@ def compress_images(M, Z_DIM, alpha, generator, test_dataloader, X_DIM, device,a
     
     # Loop over alphas first
     infos = []
-    for images in test_dataloader:
-         # Assuming your dataloader returns a tuple of images and labels
-        print("starting batch")
-        for j, image in enumerate(images):
-            # Convert image to correct device
-            image = image.to(device)
-            # Perform operations to get the generated image
-            z_opt, info = get_z_from_image(device, image, generator, W, Z_DIM, alpha, abs_Y= abs_Y, phase_shift=phase_shift, iterations=2000, lr=0.01, min_delta=0.01, patience=10)
-            print(f"got z: {z_opt}")
-            generated_image = generator(z_opt).detach().cpu()
-            infos.append(info)
-            # Compute and store the MSE for the current image
-            mse = torch.norm(image.cpu() - generated_image).item()
-            MSE.append(mse)
-            print(f"Image {j+1} - MSE: {mse:.2f} - Alpha: {alpha} - Iterations: {info['last_iter']} - Loss: {info['loss_hist'][-1]}")
-            # Collect examples for plotting
-            if len(example_images) < num_images-1:
-                example_images.append(image.cpu())
-                generated_examples.append(generated_image)
-            else:
-                break
-        # Break after the first batch
-        break
+
+    for j,image in enumerate(images):
+
+        # Convert image to correct device
+        image = image.to(device)
+        # Perform operations to get the generated image
+        z_opt, info = get_z_from_image(device, image, generator, W, Z_DIM, alpha, abs_Y= abs_Y, phase_shift=phase_shift, iterations=2000, lr=0.01, min_delta=0.01, patience=10)
+        generated_image = generator(z_opt).detach().cpu()
+        infos.append(info)
+        # Compute and store the MSE for the current image
+        mse = torch.norm(image.cpu() - generated_image).item()
+        MSE.append(mse)
+        print(f"Image {j+1} Done - MSE: {mse:.2f} - Iterations: {info['last_iter']} - Loss: {info['loss_hist'][-1]}")
+        # Collect examples for plotting
+        
+        example_images.append(image.cpu())
+        generated_examples.append(generated_image)
+
     
     if save_images or show_images:
         # Plotting the examples for the current alpha
-        fig, axs = plt.subplots(4, 2, figsize=(10, 20))
+        fig, axs = plt.subplots(num_images, 2, figsize=(10, 20))
         for idx, (orig, gen) in enumerate(zip(example_images, generated_examples)):
             axs[idx, 0].imshow(np.transpose(vutils.make_grid(orig, padding=2, normalize=True), (1, 2, 0)))
             axs[idx, 0].set_title(f"Original - Alpha {alpha}")
@@ -117,6 +112,7 @@ def compress_images(M, Z_DIM, alpha, generator, test_dataloader, X_DIM, device,a
             axs[idx, 1].axis('off')
         save_path = f"Compression_Z_{Z_DIM}_M_{M}_alpha_{alpha}.png"
         plt.savefig(save_path)
+    
     if show_images:
         plt.show()
     else:

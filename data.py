@@ -2,7 +2,7 @@ import torchvision.datasets as dset
 import torchvision.transforms as transforms
 import torch
 
-def get_data(path, ratio = 0.8, BATCH_SIZE = 128, X_DIM = 64):
+def get_data(path, ratio = 0.8, BATCH_SIZE = 128, X_DIM = 64, num_images = 5):
     # Data preprocessing
     dataset = dset.MNIST(root=path, download=True,
                     transform=transforms.Compose([
@@ -21,7 +21,7 @@ def get_data(path, ratio = 0.8, BATCH_SIZE = 128, X_DIM = 64):
                                         shuffle=True, num_workers=12)
 
     # Dataloader for testing set
-    test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=15,
-                                        shuffle=False, num_workers=18)
+    test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=num_images,
+                                        shuffle=False, num_workers=2)
     
     return train_dataloader, test_dataloader

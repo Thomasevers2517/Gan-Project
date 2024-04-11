@@ -36,18 +36,38 @@ seed = 1
 # SET DEVICE
 CUDA = CUDA and torch.cuda.is_available()
 if CUDA:
-    torch.cuda.manual_seed(seed)
+    #Make it reproducible
+    torch.cuda.manual_seed_all(seed)
 device = torch.device("cuda:0" if CUDA else "cpu")
 cudnn.benchmark = True
 
-#PARAMETERS TO BE CHANGED
-num_images = 5
-Z_DIM_list =[150]
-M_list = [250] 
-ALPHA_list =[0.4] 
-EPOCH_list = [16]
-NOISE_STD_list = [0.00]
-case_list = [3]
+import argparse
+
+# Create the parser
+parser = argparse.ArgumentParser(description='Process some integers.')
+
+# Add arguments
+parser.add_argument('--n_img', nargs='+', type=int, default=2, help='The number of images to compress (INT)')
+parser.add_argument('--k', nargs='+', type=int, default=[150], help='The dimensions of the latent space')
+parser.add_argument('--m', nargs='+', type=int, default=[250], help='The number of bits')
+parser.add_argument('--alpha', nargs='+', type=float, default=[0.4], help='The alpha values')
+parser.add_argument('--epoch', nargs='+', type=int, default=[16], help='The epoch numbers')
+parser.add_argument('--noise_std', nargs='+', type=float, default=[0.001], help='The standard deviations of the noise')
+parser.add_argument('--case_list', nargs='+', type=int, default=[3], help='The case numbers')
+
+# Parse the arguments
+args = parser.parse_args()
+
+# Now you can use the arguments in your script
+num_images = args.n_img
+if num_images == 1:
+    raise  "Number of images must be greater than 1"
+Z_DIM_list = args.k
+M_list = args.m
+ALPHA_list = args.alpha
+EPOCH_list = args.epoch
+NOISE_STD_list = args.noise_std
+case_list = args.case_list
 show_images = True
 save_images = True
 early_stopping_threshold = 0.02
@@ -68,7 +88,7 @@ if any(z > 784 for z in Z_DIM_list):
 if __name__ == '__main__':
 
     # Split dataloader into train and test
-    train_dataloader, test_dataloader = get_data(path=DATA_PATH, ratio=0.8, num_images=num_images)
+    train_dataloader, test_dataloader = get_data(path=DATA_PATH, ratio=0.8, num_images=num_images, seed=seed)
     
     print("Data loaded")
     #Run the compression for each case
@@ -88,6 +108,8 @@ if __name__ == '__main__':
         compression_MSE = {}
         images =  [image for image in next(iter(test_dataloader))]
         images = images[0]
+        
+        print(images[0][0][30])
 
         # Loop over all the parameters
         for Z_DIM in Z_DIM_list:

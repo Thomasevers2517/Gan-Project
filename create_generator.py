@@ -18,8 +18,21 @@ plot_dir = 'training_plots'
 os.makedirs(plot_dir, exist_ok=True)
 
 
-
+# A function to plot the losses
 def plot_losses(G_losses, D_losses, epoch, save=True):
+    """
+    Plot the generator and discriminator loss during training.
+
+    Parameters:
+    - G_losses (list): List of generator losses.
+    - D_losses (list): List of discriminator losses.
+    - epoch (int): Current epoch number.
+    - save (bool, optional): Whether to save the plot as an image. Default is True.
+
+    Returns:
+    None
+    """
+
     plt.figure(figsize=(10,5))
     plt.title("Generator and Discriminator Loss During Training")
     plt.plot(G_losses,label="G")
@@ -35,12 +48,34 @@ def plot_losses(G_losses, D_losses, epoch, save=True):
 
 
 
-
+# 
 def create_generator(dataloader, Z_DIM, MAX_EPOCH_NUM, retrain=False, seed=1, BATCH_SIZE=128, lr=2e-4, REAL_LABEL=1, FAKE_LABEL=0, device='cuda:0',  IMAGE_CHANNEL=1, G_HIDDEN=64, D_HIDDEN=64, X_DIM=64):
-        # Create the generator
-        
+    """
+    Creates and trains a generator model from a GAN
+
+    Args:
+        dataloader (torch.utils.data.DataLoader): The data loader for the training dataset.
+        Z_DIM (int): The dimension of the input noise vector.
+        MAX_EPOCH_NUM (int): The maximum number of epochs to train the generator.
+        retrain (bool, optional): Whether to retrain the generator from scratch or load an existing model. Defaults to False.
+        seed (int, optional): The random seed for reproducibility. Defaults to 1.
+        BATCH_SIZE (int, optional): The batch size for training. Defaults to 128.
+        lr (float, optional): The learning rate for the optimizer. Defaults to 2e-4.
+        REAL_LABEL (int, optional): The label value for real images. Defaults to 1.
+        FAKE_LABEL (int, optional): The label value for fake images. Defaults to 0.
+        device (str, optional): The device to use for training. Defaults to 'cuda:0'.
+        IMAGE_CHANNEL (int, optional): The number of channels in the input images. Defaults to 1.
+        G_HIDDEN (int, optional): The hidden size of the generator. Defaults to 64.
+        D_HIDDEN (int, optional): The hidden size of the discriminator. Defaults to 64.
+        X_DIM (int, optional): The size of the input images. Defaults to 64.
+
+    Returns:
+        Generator: The trained generator model.
+    """
+     
     file= f'Gan_weights/netG_weights_D{D_HIDDEN}_G{G_HIDDEN}_Z{Z_DIM}_epoch{MAX_EPOCH_NUM-1}.pth'
 
+    # Check if the model file exists and retrain is False, so model can be loaded
     if os.path.exists(file) and not retrain:
         print(F"Loading existing model: {file}")
         netG = Generator(Z_DIM=Z_DIM, G_HIDDEN=G_HIDDEN, IMAGE_CHANNEL=IMAGE_CHANNEL)
@@ -148,7 +183,7 @@ def create_generator(dataloader, Z_DIM, MAX_EPOCH_NUM, retrain=False, seed=1, BA
             G_losses.append(errG.item())
             D_losses.append(errD.item())
 
-
+        # save the generator model after each epoch
         torch.save(netG.state_dict(), f'Gan_weights/netG_weights_D{D_HIDDEN}_G{G_HIDDEN}_Z{Z_DIM}_epoch{epoch}.pth')
 
     

@@ -1,3 +1,8 @@
+
+# Source: 
+# S. Schwarz, “How to build a gan for generating mnist digits in pytorch,” Jun 2022. 5
+
+
 import torch.nn as nn
 def weights_init(m):
     classname = m.__class__.__name__

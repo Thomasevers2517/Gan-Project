@@ -47,7 +47,7 @@ import argparse
 parser = argparse.ArgumentParser(description='Process some integers.')
 
 # Add arguments
-parser.add_argument('--n_img', nargs='+', type=int, default=2, help='The number of images to compress (INT)')
+parser.add_argument('--n_img', nargs='+', type=int, default=[2], help='The number of images to compress (INT)')
 parser.add_argument('--k', nargs='+', type=int, default=[150], help='The dimensions of the latent space')
 parser.add_argument('--m', nargs='+', type=int, default=[250], help='The number of bits')
 parser.add_argument('--alpha', nargs='+', type=float, default=[0.4], help='The alpha values')
@@ -59,7 +59,7 @@ parser.add_argument('--case', nargs='+', type=int, default=[3], help='The case n
 args = parser.parse_args()
 
 # Now you can use the arguments in your script
-num_images = args.n_img
+num_images = args.n_img[0]
 if num_images == 1:
     raise  "Number of images must be greater than 1"
 Z_DIM_list = args.k
@@ -67,7 +67,7 @@ M_list = args.m
 ALPHA_list = args.alpha
 EPOCH_list = args.epoch
 NOISE_STD_list = args.noise_std
-case_list = args.case_list
+case_list = args.case
 show_images = True
 save_images = True
 early_stopping_threshold = 0.02

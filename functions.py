@@ -31,9 +31,10 @@ def get_z_from_image(device, image, generator, W, Z_DIM, alpha, abs_Y, phase_shi
     image = image.to(device)
     z = torch.randn(1, Z_DIM, 1, 1, device=device, requires_grad=True)
     optimizer = torch.optim.Adam([z], lr=lr)
-    flat_image = image.view(-1)
+    flat_image = image.view(-1) 
     flat_image = flat_image.to(device)
-    Y = torch.matmul(W, flat_image)
+    Y = torch.matmul(W, flat_image) 
+    Y = Y + 0.01*torch.randn_like(Y) # add noise to Y
     if abs_Y:
         Y = torch.abs(Y)
     loss_hist = []

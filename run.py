@@ -12,12 +12,13 @@ import torchvision.datasets as dset
 import torchvision.utils as vutils
 import matplotlib.pyplot as plt
 import json
-
+import pandas as pd
+import seaborn as sns
 from data import get_data
 from model import Generator, Discriminator, weights_init
 from create_generator import create_generator
 from loss import loss
-from functions import get_z_from_image, compress_images
+from functions import get_z_from_image, compress_images, gen_scatterplot, gen_heatmaps_m_vs_alpha, gen_heatmaps_k_vs_m
 
 #FIXED PARAMETERS
 CUDA = True
@@ -54,6 +55,11 @@ parser.add_argument('--alpha', nargs='+', type=float, default=[0.4], help='The a
 parser.add_argument('--epoch', nargs='+', type=int, default=[16], help='The epoch numbers')
 parser.add_argument('--noise_std', nargs='+', type=float, default=[0.001], help='The standard deviations of the noise')
 parser.add_argument('--case', nargs='+', type=int, default=[3], help='The case numbers')
+parser.add_argument('--show_plots', type=bool, default=False, help='Show result plots? (True/False)')
+parser.add_argument('--plot_type', type=int, default=1, help='Type of plot to generate. 1 for scatterplot, 2 for heatmap m vs alpha, 3 for heatmap k vs m.')
+parser.add_argument('--filename', type=str, default='Compression_losses/compression_MSE_onlyepoch16.json', help='Path to the JSON file containing the data.')
+
+
 
 # Parse the arguments
 args = parser.parse_args()
@@ -71,6 +77,7 @@ case_list = args.case
 show_images = True
 save_images = True
 early_stopping_threshold = 0.02
+plot= args.show_plots
 
 #Check for invalid parameters
 if any(epoch > 16 for epoch in EPOCH_list):
@@ -82,6 +89,16 @@ if any(M > 784 for M in M_list):
 if any(z > 784 for z in Z_DIM_list):
     raise ValueError("Z_DIM value in Z_DIM_list cannot be greater than 784.")
 
+if plot:
+    if args.plot_type == 1:
+        gen_scatterplot(loss_filename=args.filename)
+    elif args.plot_type == 2:
+        gen_heatmaps_m_vs_alpha(filename=args.filename)
+    elif args.plot_type == 3:
+        gen_heatmaps_k_vs_m(filename=args.filename)
+    else:
+        raise ValueError("Invalid plot type. Choose 1 for scatterplot, 2 for heatmap m vs alpha, 3 for heatmap k vs m.")
+    sys.exit()
 
 
 
@@ -138,4 +155,7 @@ if __name__ == '__main__':
     #Save the results
         with open(f'Compression_losses/compression_MSE_z_{Z_DIM_list}_m_{M_list}_epoch_{EPOCH_list}_alpha_{ALPHA_list}_noisestd_{NOISE_STD_list}_case{case}.json', 'w') as f:
             json.dump(compression_MSE, f)
+
+
+    
     

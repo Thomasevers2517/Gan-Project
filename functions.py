@@ -4,6 +4,9 @@ from loss import loss
 import numpy as np
 import matplotlib.pyplot as plt
 import torchvision.utils as vutils
+import json
+import pandas as pd
+import seaborn as sns
 
         
 
@@ -136,7 +139,149 @@ def compress_images(M, Z_DIM, alpha, generator, images, X_DIM, device, abs_Y, ph
     return MSE, infos
     
 
+def gen_scatterplot(loss_filename= 'Compression_losses/compression_MSE_onlyepoch16.json', iter_filename = 'iter_info.json'):
+    """
+    Generates a scatter plot of Mean Squared Error (MSE) against iterations till convergence.
+
+    Parameters:
+    loss_filename (str): The path to the JSON file containing the loss data. Default is 'Compression_losses/compression_MSE_onlyepoch16.json'.
+    iter_filename (str): The path to the JSON file containing the iteration data. Default is 'iter_info.json'.
+
+    Returns:
+    The scatter plot uses different colors to represent different 'k' values and different markers to represent different 'm' values.
+    The 'k' values are represented in the legend in the upper left corner of the plot.
+    The 'm' values are represented in the legend in the lower left corner of the plot.
+    The x-axis represents the number of iterations till convergence.
+    The y-axis represents the Mean Squared Error (MSE).
+    The title of the plot indicates the 'alpha' value used.
+    """
+    loss_data = json.load(open(loss_filename))
+    iter_data = json.load(open(iter_filename))
+    z_dim = list(loss_data.keys())
+    print(z_dim)
+    epochs = list(loss_data[z_dim[0]].keys())
+    print(epochs)
+    m_dim = list(loss_data[z_dim[0]][epochs[0]].keys())
+    print(m_dim)
+    alphas = list(loss_data[z_dim[0]][epochs[0]][m_dim[0]].keys())
+    print(alphas)  
+    iter_last={}
+    MSE = pd.DataFrame(columns = ['Z', 'M', 'Last_iter', 'MSE'])
+    for alpha in alphas:
+        for z in z_dim:
+            iter_last[z]={}
+            for m in m_dim:
+                iters= [iter_data[z][m][i]['last_iter'] for i in range(5)]
+                iter_last[z][m]=np.mean(iters)
+                df= {'Z': z, 'M': m, 'Last_iter': iter_last[z][m], 'MSE': np.mean(loss_data[z][epochs[-1]][m][alpha])} 
+                MSE = pd.concat([MSE, pd.DataFrame([df])], ignore_index=True)
+
+        colour = {'10': 'gold', '50': 'darkorange', '75': 'orangered', '100': 'red', '150': 'firebrick', '200': 'maroon', '1000': 'black'}
+        marker={'10': 'o', '40': '^', '160': 'D', '480': 'P'}
+        fig, ax = plt.subplots(1, 1, figsize=(6,6))
+        for i in range(len(MSE)):
+            ax.scatter(MSE['Last_iter'][i], MSE["MSE"][i], c=colour[MSE["Z"][i]], marker=marker[MSE["M"][i]], s=100)
+        markers1 = [plt.Line2D([0,0],[0,0],color=color, marker='o', linestyle='') for color in colour.values()]
+        firstlegend= ax.legend(markers1, colour.keys(), numpoints=1, title="k", loc='upper left',bbox_to_anchor=(1.01, 1))
+        ax.add_artist(firstlegend)
+        markers2 = [plt.Line2D([0,0],[0,0],color='black', marker=marker, linestyle='') for marker in marker.values()]
+        ax.legend(markers2, marker.keys(), numpoints=1, title="m", loc='lower left', bbox_to_anchor=(1.01, 0))
+        plt.xlabel("Iterations till convergence", fontsize=12)
+        plt.ylabel("MSE", fontsize=12)
+        plt.title(f"Iterations vs MSE for alpha= {alpha}", fontsize=12)
+        plt.show()
+        plt.clf()
+        plt.close()
+        MSE = MSE.iloc[0:0] 
     
     
-    
+def gen_heatmaps_m_vs_alpha(filename='Compression_losses/compression_MSE_epoch_16_Case1.json'):
+    """
+    Generates a heatmap of Mean Squared Error (MSE) against 'm' and 'alpha' values.
+
+    Parameters:
+    filename (str): The path to the JSON file containing the data. Default is 'Compression_losses/compression_MSE_epoch_16_Case1.json'.
+
+    Returns:
+    Each heatmap uses the 'YlOrRd' color scheme to represent different MSE values.
+    The x-axis represents 'alpha' values.
+    The y-axis represents 'm' values.
+    The title of the heatmap indicates the 'k' value used.
+    The MSE values and their variances are annotated on the heatmap.
+    """
+    data = json.load(open(filename))
+    z_dim = list(data.keys())
+    print(z_dim)
+    epochs = list(data[z_dim[0]].keys())
+    print(epochs)
+    m_dim = list(data[z_dim[0]][epochs[0]].keys())
+    print(m_dim)
+    alphas = list(data[z_dim[0]][epochs[0]][m_dim[0]].keys())
+    print(alphas)
+    MSE = np.zeros(( len(m_dim), len(alphas)))
+    MSEvar = np.zeros(( len(m_dim), len(alphas)))
+
+    for z in z_dim:
+        for m in m_dim:
+            for alpha in alphas:
+                err=np.mean(data[z][epochs[-1]][m][alpha])
+                var=np.std(data[z][epochs[-1]][m][alpha])
+                MSE[int(m_dim.index(m)), int(alphas.index(alpha))]=err
+                MSEvar[int(m_dim.index(m)), int(alphas.index(alpha))]=var
+        print(MSE.shape)
+
+        sns.heatmap(MSE, annot=True, annot_kws={'va':'bottom', 'size': 'x-large'}, fmt=".2f", cmap='YlOrRd', xticklabels=alphas, yticklabels=m_dim, cbar=False)
+        sns.heatmap(MSE, annot=MSEvar, annot_kws={'va':'top', 'size': 'large'}, fmt=".2f", cmap='YlOrRd', xticklabels=alphas, yticklabels=m_dim, cbar=False)
+        plt.xticks(fontsize=14)  
+        plt.yticks(fontsize=14) 
+        plt.xlabel("alpha values", fontsize=14)
+        plt.ylabel("m values", fontsize=14)
+        plt.title("MSE Heatmap for k= "+z, fontsize=14)
+        plt.show()
+
+
+def gen_heatmaps_k_vs_m(filename='Compression_losses/compression_MSE_Case3.json'):
+    """
+    Generates a series of heatmaps of Mean Squared Error (MSE) against 'k' and 'm' values for different 'alpha' values.
+
+    Parameters:
+    filename (str): The path to the JSON file containing the data. Default is 'Compression_losses/compression_MSE_Case3.json'.
+
+    Returns:
+    Each heatmap uses the 'YlOrRd' color scheme to represent different MSE values.
+    The x-axis represents 'k' values.
+    The y-axis represents 'm' values.
+    The title of each heatmap indicates the 'alpha' value used.
+    The MSE values and their standard deviations are annotated on each heatmap.
+    """
+    data = json.load(open(filename))
+    z_dim = list(data.keys())
+    print(z_dim)
+    epochs = list(data[z_dim[0]].keys())
+    print(epochs)
+    m_dim = list(data[z_dim[0]][epochs[0]].keys())
+    print(m_dim)
+    alphas = list(data[z_dim[0]][epochs[0]][m_dim[0]].keys())
+    print(alphas)
+    MSE = np.zeros((len(alphas), len(m_dim), len(z_dim)))
+    MSEvar = np.zeros((len(alphas), len(m_dim), len(z_dim)))
+    for z in z_dim:
+        for epoch in epochs:
+            for m in m_dim:
+                for alpha in alphas:
+                    err=np.mean(data[z][epoch][m][alpha])
+                    var=np.std(data[z][epoch][m][alpha])
+                    MSE[int(alphas.index(alpha)), int(m_dim.index(m)), int(z_dim.index(z))]=err
+                    MSEvar[int(alphas.index(alpha)), int(m_dim.index(m)), int(z_dim.index(z))]=var
+    print(MSE.shape)
+    for i in range(len(alphas)):
+        sns.heatmap(MSE[i], annot=True, annot_kws={'va':'bottom'}, fmt=".2f", cmap='YlOrRd', xticklabels=z_dim, yticklabels=m_dim)
+        sns.heatmap(MSE[i], annot=MSEvar[i], annot_kws={'va':'top', 'size': 'x-small'}, fmt=".2f", cmap='YlOrRd', xticklabels=z_dim, yticklabels=m_dim, cbar=False)
+        plt.xlabel("k values")
+        plt.ylabel("m values")
+        plt.title("MSE Heatmap for Alpha= "+ str(alphas[i]))
+        plt.show()
+        #plt.savefig(save_path+f"MSE_heatmap_alpha_{alphas[i]}.png")
+        plt.close()
+
     
